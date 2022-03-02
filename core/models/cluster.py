@@ -5,72 +5,85 @@ import random
 import numpy as np
 import dtw
 
+from sklearn.preprocessing import StandardScaler
+
 class TimeSeriesKMeans():
-    def __init__(self, k_clusters, p=2, q=2, metric='my_score', max_iter=300, eps=0.001):
+    def __init__(self, k_clusters, p=2, q=2, metric='my_score', max_iter=300, eps=0.001, normalize=True, random_state=None):
         self.k_clusters = k_clusters
         self.metric = metric
         self.p = p
         self.q = q
         self.max_iter = max_iter
         self.eps = eps
+        self.normalize = normalize
+        self.random_state = random_state
+        self.scaler = StandardScaler()
 
-    def fit(self, X):
-        pass
 
-    def calculate_cost(self, X, centroids, clusters):
-        '''
-        :param X: A list of time series
-        :param centroids: Fuzzy coeficients for time series representing centroids. A numpy 2-d array.
-        :param clusters: Assigned class for a given time series.
-        :return:
-        '''
-        total = 0.0
-        for i, ts in enumerate(X):
-            assigned_cluster = int(clusters[i]) # 0, 1, 2 ... k
-            nearest_centroid = centroids[assigned_cluster, :]
-            coefs, split_point = ts.f_coefs
-            if self.metric == 'my_score':
-                total += my_score(nearest_centroid, coefs, split_point, self.p, self.q)
-            if self.metric == 'dtw':
-                total += dtw.dtw(X[i].values, nearest_centroid).normalizedDistance
-        return total / len(X)
+    def fit(self, train):
+        n = len(train)
 
-    def fit(self, X):
-        # Assume that all X have the same length of direct_coef_0 and direct_coef_1
-        n = len(X)
-        if self.metric == 'my_score':
-            p = len(X[0].FTransform.direct_coefs_0) + len(X[0].FTransform.direct_coefs_1)
-        if self.metric == 'dtw':
-            p = len(X[0].values)
+        if self.metric == 'f_transform':
+            p = len(train[0].FTransform.direct_coefs_0) + len(train[0].FTransform.direct_coefs_1)
+            X = np.zeros((n, p))
+            split_points = np.zeros(n)
+            for i in range(n):
+                X[i, :], split_points[i] = train[i].f_coefs
+
+        if self.metric == 'dtw' or self.metric == 'euclidean':
+            p = len(train[0].values)
+            X = np.zeros((n, p))
+            for i in range(n):
+                X[i, :] = train[i].values
+
+        if self.normalize and self.metric != 'f_transform':
+            X = self.scaler.fit_transform(X)
+
         self.clusters = np.zeros(n)
         self.centroids = np.zeros((self.k_clusters, p))
+
+        if self.random_state is not None:
+            random.seed(self.random_state)
+
         j = 0
         for i in random.sample(list(np.arange(0, n, 1)), self.k_clusters):
-            if self.metric == 'my_score':
-                self.centroids[j, :] = X[i].FTransform.direct_coefs_0 + X[i].FTransform.direct_coefs_1
-            if self.metric == 'dtw':
-                self.centroids[j, :] = X[i].values
+            self.centroids[j, :] = X[i, :]
             j += 1
 
         prev_step_cost = None
         for iter in range(self.max_iter):
             for i in range(n):
-                x, split_point = X[i].f_coefs
                 nearest_cluster = int(self.clusters[i])
                 nearest_centroid = self.centroids[nearest_cluster, :]
-                if self.metric == 'my_score':
-                    act_distance = my_score(x, nearest_centroid, split_point, self.p, self.q)
+
+                if self.metric == 'f_transform':
+                    act_distance = my_score(X[i, :], nearest_centroid, int(split_points[i]), self.p, self.q)
                 if self.metric == 'dtw':
-                    act_distance = dtw.dtw(X[i].values, nearest_centroid).normalizedDistance
+                    act_distance = dtw.dtw(X[i, :], nearest_centroid).normalizedDistance
+                if self.metric == 'euclidean':
+                    act_distance = sum(np.power(abs(X[i, :] - nearest_centroid), self.p)) ** (1 / self.p)
+
                 for k in range(self.k_clusters):
-                    if self.metric == 'my_score':
-                        dist_to_cluster = my_score(x, self.centroids[k, :], split_point, self.p, self.q)
+                    if self.metric == 'f_transform':
+                        dist_to_cluster = my_score(X[i, :], self.centroids[k, :], int(split_points[i]), self.p, self.q)
                     if self.metric == 'dtw':
-                        dist_to_cluster = dtw.dtw(X[i].values, self.centroids[k, :]).normalizedDistance
+                        dist_to_cluster = dtw.dtw(X[i, :], self.centroids[k, :]).normalizedDistance
+                    if self.metric == 'euclidean':
+                        dist_to_cluster = sum(np.power(abs(X[i, :] - self.centroids[k, :]), self.p)) ** (1 / self.p)
                     if dist_to_cluster < act_distance:
                         self.clusters[i] = k
 
-            total_cost = self.calculate_cost(X, self.centroids, self.clusters)
+            total_cost = 0.0
+            for i in range(n):
+                nearest_cluster = int(self.clusters[i])  # 0, 1, 2 ... k
+                nearest_centroid = self.centroids[nearest_cluster, :]
+                if self.metric == 'f_transform':
+                    total_cost += my_score(X[i, :], nearest_centroid, int(split_points[i]), self.p, self.q)
+                if self.metric == 'dtw':
+                    total_cost += dtw.dtw(X[i, :], nearest_centroid).normalizedDistance
+                if self.metric == 'euclidean':
+                    total_cost += sum(np.power(abs(X[i, :] - nearest_centroid), self.p)) ** (1 / self.p)
+            total_cost /= len(X)
 
             # New centroids
             for k in range(self.k_clusters):
@@ -79,11 +92,7 @@ class TimeSeriesKMeans():
                 for i in range(n):
                     if self.clusters[i] != k:
                         continue
-                    if self.metric == 'my_score':
-                        x, _ = X[i].f_coefs
-                    if self.metric == 'dtw':
-                        x = X[i].values
-                    total = total + x
+                    total = total + X[i, :]
                     counter += 1
                 if counter != 0:
                     self.centroids[k, :] = total / counter

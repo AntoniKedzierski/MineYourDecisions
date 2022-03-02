@@ -24,9 +24,9 @@ for i, file in enumerate(os.listdir('data/djia_composite')):
     labels.append(ts.name)
     X.append(ts)
 
-kmeans = TimeSeriesKMeans(k_clusters=6, metric='dtw')
+kmeans = TimeSeriesKMeans(k_clusters=6, metric='f_transform', random_state=42)
 kmeans.fit(X)
-classes, _ = kmeans.predict()
+classes, centroids = kmeans.predict()
 
 classes = pd.DataFrame({'series': labels, 'classes': classes})
 plot_data = pd.DataFrame(series).melt(id_vars='timestamp', var_name='series', value_vars=labels).merge(classes,
