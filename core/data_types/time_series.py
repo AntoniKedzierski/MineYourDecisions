@@ -7,19 +7,12 @@ from typing import Sequence
 import numbers
 import warnings
 
+from core.analysis.transforms import FTransform
+
 pd.set_option('display.max_rows', 500)
 
 
 class TimeSeries:
-    # Time index
-    time = None
-
-    # Values of series
-    values = None
-
-    # Other params to describe time series
-    name = None
-
     # ==========================================
     # IN-CLASSES
     # ==========================================
@@ -82,6 +75,19 @@ class TimeSeries:
         arg_sorted = self.time.argsort()
         self.time = self.time[arg_sorted]
         self.values = self.values[arg_sorted]
+        self.enumeration = np.arange(0, self.values.__len__(), 1)
+
+        # Calculate FTransform
+        h0 = 3
+        h1 = 5
+        if 'h0' in kwargs:
+            h0 = kwargs['h0']
+        if 'h1' in kwargs:
+            h1 = kwargs['h1']
+
+        self.FTransform = FTransform(0, self.enumeration[-1], h0, h1)
+        self.FTransform.fit(self.enumeration, self.values)
+
 
     # To string
     def __str__(self):
@@ -107,6 +113,9 @@ class TimeSeries:
     # Extracting data from time series
     def __getitem__(self, item):
         return self.values[item]
+
+    def __setitem__(self, key, value):
+        self.values[key] = value
 
     # At certain time point
     @property
@@ -143,6 +152,10 @@ class TimeSeries:
     def as_pandas(self):
         name = self.name if self.name is not None else 'values'
         return pd.DataFrame({'timestamp': self.time, name: self.values})
+
+    @property
+    def f_coefs(self):
+        return np.asarray(self.FTransform.direct_coefs_0 + self.FTransform.direct_coefs_1), len(self.FTransform.direct_coefs_0)
 
     # ==========================================
     # TRANSFORMATIONS
@@ -182,6 +195,10 @@ class TimeSeries:
 
         name_left = self.name if self.name is not None else 1
         name_right = ts.name if ts.name is not None else 2
+
+        if name_left == name_right:
+            name_left = name_left + '_1'
+            name_right = name_right + '_2'
 
         new_time = list(sorted(set(time_left + time_right)))
         df = { 'time': new_time }
