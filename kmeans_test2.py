@@ -24,7 +24,7 @@ for i, file in enumerate(os.listdir('data/djia_composite')):
     labels.append(ts.name)
     X.append(ts)
 
-kmeans = TimeSeriesKMeans(k_clusters=6, metric='f_transform', random_state=42)
+kmeans = TimeSeriesKMeans(k_clusters=6, metric='dtw', random_state=42, predict_coefs=False)
 kmeans.fit(X)
 classes, centroids = kmeans.predict()
 
@@ -36,6 +36,7 @@ plot_data = pd.DataFrame(series).melt(id_vars='timestamp', var_name='series', va
 plot_data['timestamp'] = plot_data['timestamp'].astype('datetime64')
 
 for i in range(kmeans.k_clusters):
+    centroids[i].plot()
     sns.lineplot(x='timestamp', y='value', hue='series', data=plot_data.loc[plot_data.classes == i, :])
     plt.title(f'Class no. {i}')
     plt.show()

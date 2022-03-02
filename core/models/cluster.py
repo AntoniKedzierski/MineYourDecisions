@@ -8,7 +8,7 @@ import dtw
 from sklearn.preprocessing import StandardScaler
 
 class TimeSeriesKMeans():
-    def __init__(self, k_clusters, p=2, q=2, metric='my_score', max_iter=300, eps=0.001, normalize=True, random_state=None):
+    def __init__(self, k_clusters, p=2, q=2, metric='my_score', max_iter=300, eps=0.001, normalize=True, random_state=None, predict_coefs=False):
         self.k_clusters = k_clusters
         self.metric = metric
         self.p = p
@@ -17,11 +17,20 @@ class TimeSeriesKMeans():
         self.eps = eps
         self.normalize = normalize
         self.random_state = random_state
+        self.predict_coefs = predict_coefs
+        self.time = None
         self.scaler = StandardScaler()
+
+        if self.metric == 'f_transform':
+            self.normalize = False
+            self.predict_coefs = True
 
 
     def fit(self, train):
         n = len(train)
+
+        # All time series have to have a common time domain
+        self.time = train[0].time
 
         if self.metric == 'f_transform':
             p = len(train[0].FTransform.direct_coefs_0) + len(train[0].FTransform.direct_coefs_1)
@@ -36,7 +45,7 @@ class TimeSeriesKMeans():
             for i in range(n):
                 X[i, :] = train[i].values
 
-        if self.normalize and self.metric != 'f_transform':
+        if self.normalize:
             X = self.scaler.fit_transform(X)
 
         self.clusters = np.zeros(n)
@@ -104,6 +113,14 @@ class TimeSeriesKMeans():
             prev_step_cost = total_cost
 
     def predict(self):
-        return self.clusters, self.centroids
-
-
+        if self.predict_coefs:
+            if self.normalize:
+                return self.clusters, self.scaler.inverse_transform(self.centroids)
+            return self.clusters, self.centroids
+        ts = []
+        for i in range(self.centroids.shape[0]):
+            if self.normalize:
+                ts.append(TimeSeries(self.time, self.scaler.inverse_transform(self.centroids)[i, :], name=f'Centroid no. {i}'))
+            else:
+                ts.append(TimeSeries(self.time, self.centroids[i, :], name=f'Centroid no. {i}'))
+        return self.clusters, ts

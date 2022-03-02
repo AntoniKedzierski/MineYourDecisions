@@ -58,7 +58,7 @@ class TimeSeries:
 
         elif len(args) == 2:
             if args[0].__len__() != args[1].__len__():
-                raise ValueError('Time and values have different length.')
+                raise ValueError(f'Time and values have different length. Time: {args[0].__len__()}, values: {args[1].__len__()}')
 
             if not isinstance(args[1][0], numbers.Number):
                 raise ValueError('Time series must have a numerical values.')
