@@ -126,8 +126,10 @@ class TimeSeries:
     def plot(self, title=None, labels=(None, None)):
         if title is None:
             plt.title(self.name)
+        print(self.time)
         try:
             time = np.asarray(self.time, dtype='datetime64')
+            print(time)
         except:
             time = self.time
         sns.lineplot(x = time, y = self.values)
@@ -152,6 +154,10 @@ class TimeSeries:
     def as_pandas(self):
         name = self.name if self.name is not None else 'values'
         return pd.DataFrame({'timestamp': self.time, name: self.values})
+
+    @property
+    def diff(self):
+        return self.values[1:] - self.values[0:-1]
 
     @property
     def f_coefs(self):

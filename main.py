@@ -16,6 +16,13 @@ from core.models.cluster import TimeSeriesKMeans
 
 from dtw import *
 
+
+'''
+Notatki bieżące:
+    1. Filip W. twierdzi, że algorytm ROCKET ma bardzo dobrą skuteczność.
+    2. Rozciąganie zbiorów rozmytych - a la Dynamic Time Wrapping.
+'''
+
 if __name__ == '__main__':
     apple = TimeSeries.read_csv('data/djia_composite/AAPL.csv', name='Apple')
     cat = TimeSeries.read_csv('data/djia_composite/CAT.csv', name='Caterpillar')

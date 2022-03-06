@@ -24,7 +24,7 @@ for i, file in enumerate(os.listdir('data/djia_composite')):
     labels.append(ts.name)
     X.append(ts)
 
-kmeans = TimeSeriesKMeans(k_clusters=6, metric='dtw', random_state=42, predict_coefs=False)
+kmeans = TimeSeriesKMeans(k_clusters=6, metric='f_transform', random_state=42, predict_coefs=False)
 kmeans.fit(X)
 classes, centroids = kmeans.predict()
 
