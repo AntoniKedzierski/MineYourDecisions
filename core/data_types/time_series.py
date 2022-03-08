@@ -4,6 +4,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 
 from typing import Sequence
+from scipy.interpolate import interp1d
 import numbers
 import warnings
 
@@ -88,6 +89,9 @@ class TimeSeries:
         self.FTransform = FTransform(0, self.enumeration[-1], h0, h1)
         self.FTransform.fit(self.enumeration, self.values)
 
+        # Calculate interpolation
+        self.f_interpolate = interp1d(self.enumeration, self.values, kind='cubic')
+
 
     # To string
     def __str__(self):
@@ -116,6 +120,12 @@ class TimeSeries:
 
     def __setitem__(self, key, value):
         self.values[key] = value
+
+    # Value at any point of time, by observation number
+    def __call__(self, *args, **kwargs):
+        print(args)
+        x = args[0]
+        return self.f_interpolate(x)
 
     # At certain time point
     @property
@@ -180,6 +190,7 @@ class TimeSeries:
         if not inplace:
             return TimeSeries(self.time, (self.values - np.mean(self.values)) / np.std(self.values), name=self.name)
         self.values = (self.values - np.mean(self.values)) / np.std(self.values)
+        self.f_interpolate = interp1d(self.enumeration, self.values)
 
     # ==========================================
     # JOINS

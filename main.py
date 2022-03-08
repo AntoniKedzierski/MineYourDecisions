@@ -12,9 +12,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 import copy
 
-from core.models.cluster import TimeSeriesKMeans
-
-from dtw import *
+# from core.models.cluster import TimeSeriesKMeans
 
 
 '''
@@ -27,7 +25,7 @@ if __name__ == '__main__':
     apple = TimeSeries.read_csv('data/djia_composite/AAPL.csv', name='Apple')
     cat = TimeSeries.read_csv('data/djia_composite/CAT.csv', name='Caterpillar')
 
-    print(dtw(cat.values, apple.values).normalizedDistance)
+    print(cat([1.2, 3]))
 
 
 
