@@ -3,6 +3,7 @@ from scipy.integrate import quad
 
 import copy
 import numpy as np
+import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -58,19 +59,40 @@ class DynamicFTransform:
 
         # Calculate coeficients
         self.calculate_fuzzy_coefs()
-
-        print(self.coef1_derivative(0, 0))
-        print(self.coef1_derivative(0, 1))
-        print(self.coef1_derivative(0, 2))
         loss_f = self.loss_function
-        return
+
+        # Constrain
+        cons = [{
+            'type': 'ineq',
+            'fun': lambda x: x[i + 2] - x[i + 1]
+        } for i in range(self.n_coef)]
+        cons += [{
+            'type': 'ineq',
+            'fun': lambda x: x[i + 2 + self.n_splits] - x[i + 1 + self.n_splits]
+        } for i in range(self.n_coef)]
+        # cons.append({
+        #     'type': 'eq',
+        #     'fun': lambda x: x[0]
+        # })
+        # cons.append({
+        #     'type': 'eq',
+        #     'fun': lambda x: x[self.n_splits - 1]
+        # })
+        # cons.append({
+        #     'type': 'eq',
+        #     'fun': lambda x: x[self.n_splits]
+        # })
+        # cons.append({
+        #     'type': 'eq',
+        #     'fun': lambda x: x[2 * self.n_splits - 1]
+        # })
 
         # Optimize task
         self.optim_iter = 0
         x = np.concatenate([self.x1, self.x2], axis=0)
         bounds = np.concatenate([[(0, self.x1[-1]) for i in range(self.n_splits)], [(0, self.x2[-1]) for i in range(self.n_splits)]], axis=0)
         # optim = minimize(lambda x: self.to_minimize(x, gradient=False), x, method='Powell', bounds=bounds)
-        optim = minimize(lambda x: self.to_minimize(x), x, jac=True, method='L-BFGS-B', bounds=bounds, options={'disp': False})
+        optim = minimize(lambda x: self.to_minimize(x), x, jac=True, method='SLSQP', bounds=bounds, options={'disp': False}, constraints=cons)
 
         # Optimal partition
         self.x1 = optim.x[:self.n_splits]
@@ -78,7 +100,6 @@ class DynamicFTransform:
 
         # Display fit results
         print(f'Iters: {optim.nit}. Loss function decreased from {loss_f} to {optim.fun}.')
-
         
 
     def calculate_fuzzy_coefs(self):
@@ -113,9 +134,9 @@ class DynamicFTransform:
             return 2 / (c - a) * (self.coef1[k] / 2 + int_1 / ((b - a) ** 2))
         if i - 1 == k: # Partial w.r.t. b
             a, b, c = self.x1[i - 1], self.x1[i], self.x1[i + 1]
-            int_1, _ = quad(lambda x: (a - x) * self.f1(x), a, b, limit=100)
+            int_1, _ = quad(lambda x: (x - a) * self.f1(x), a, b, limit=100)
             int_2, _ = quad(lambda x: (c - x) * self.f1(x), b, c, limit=100)
-            return 2 * (c - a) * (2 * self.f1(b) + int_1 / ((b - a) ** 2) + int_2 / ((c - b) ** 2))
+            return 2 / (c - a) * (-int_1 / ((b - a) ** 2) + int_2 / ((c - b) ** 2))
         if i - 2 == k: # Partial w.r.t. c
             a, b, c = self.x1[i - 2], self.x1[i - 1], self.x1[i]
             int_1, _ = quad(lambda x: (x - b) * self.f1(x), b, c, limit=100)
@@ -136,9 +157,9 @@ class DynamicFTransform:
             return 2 / (c - a) * (self.coef2[k] / 2 + int_1 / ((b - a) ** 2))
         if i - 1 == k:
             a, b, c = self.x2[i - 1], self.x2[i], self.x2[i + 1]
-            int_1, _ = quad(lambda x: (a - x) * self.f2(x), a, b, limit=100)
+            int_1, _ = quad(lambda x: (x - a) * self.f2(x), a, b, limit=100)
             int_2, _ = quad(lambda x: (c - x) * self.f2(x), b, c, limit=100)
-            return 2 * (c - a) * (2 * self.f2(b) + int_1 / ((b - a) ** 2) + int_2 / ((c - b) ** 2))
+            return 2 / (c - a) * (-int_1 / ((b - a) ** 2) + int_2 / ((c - b) ** 2))
         if i - 2 == k:
             a, b, c = self.x2[i - 2], self.x2[i - 1], self.x2[i]
             int_1, _ = quad(lambda x: (x - b) * self.f2(x), b, c, limit=100)
@@ -170,7 +191,7 @@ class DynamicFTransform:
 
 
     def to_minimize(self, x, gradient=True):
-        self.plot_inv(self.x1)
+        self.plot_sets()
         self.optim_iter += 1
 
         self.x1 = x[:self.n_splits]
@@ -179,6 +200,8 @@ class DynamicFTransform:
 
         loss = self.loss_function
         print(f'Iteration {self.optim_iter}, loss: {loss}')
+        print(self.x1)
+        print(self.x2)
 
         if gradient:
             return loss, self.gradient
@@ -208,17 +231,39 @@ class DynamicFTransform:
         sns.lineplot(x=x, y=plot_f2)
         plt.show()
 
+    def plot_sets(self):
+        plot_n = 1000
+        x = np.linspace(min(self.x1[0], self.x2[0]), max(self.x1[-1], self.x2[-1]), plot_n)
+        plot_data = { 'x': x }
+        plot_series = []
+        for i in range(self.n_coef):
+            a1, b1, c1 = self.x1[i], self.x1[i + 1], self.x1[i + 2]
+            a2, b2, c2 = self.x2[i], self.x2[i + 1], self.x2[i + 2]
+            plot_data[f'set_{i}_1'] = np.zeros(plot_n)
+            plot_data[f'set_{i}_2'] = np.zeros(plot_n)
+            plot_series += [f'set_{i}_1', f'set_{i}_2']
+            maks = abs(max(max(self.f1(x)), max(self.f2(x))))
+            for j in range(plot_n):
+                plot_data[f'set_{i}_1'][j] = max(0, min((x[j] - a1) / (b1 - a1), (c1 - x[j]) / (c1 - b1))) / (maks * 10)
+                plot_data[f'set_{i}_2'][j] = maks + 0.3 - max(0, min((x[j] - a2) / (b2 - a2), (c2 - x[j]) / (c2 - b2))) / (maks * 10)
+                if x[j] < a1 or x[j] > c1:
+                    plot_data[f'set_{i}_1'][j] = None
+                if x[j] < a2 or x[j] > c2:
+                    plot_data[f'set_{i}_2'][j] = None
+        plot_df = pd.DataFrame(plot_data)
+        plot_df = plot_df.melt(id_vars='x', value_vars=plot_series, value_name='value', var_name='set')
+        plot_f1, plot_f2 = self.inverse(x)
+        sns.lineplot(x='x', y='value', hue='set', data=plot_df)
+        # sns.lineplot(x=x, y=plot_f1)
+        # sns.lineplot(x=x, y=plot_f2)
+        plt.legend([], [], frameon=False)
+        plt.show()
+
 
 if __name__ == '__main__':
-    # apple = TimeSeries.read_csv('data/djia_composite/AAPL.csv', name='Apple')
-    # cat = TimeSeries.read_csv('data/djia_composite/CAT.csv', name='Caterpillar')
+    apple = TimeSeries.read_csv('data/djia_composite/AAPL.csv', name='Apple')
+    cat = TimeSeries.read_csv('data/djia_composite/CAT.csv', name='Caterpillar')
 
-    def f(x):
-        return x
-
-    def g(x):
-        return x
-
-    df = DynamicFTransform(n_coef=3)
-    df.fit(f, g, domain_1=(0, 1), domain_2=(0, 1))
+    df = DynamicFTransform(n_coef=50)
+    df.fit(apple, cat)
 
