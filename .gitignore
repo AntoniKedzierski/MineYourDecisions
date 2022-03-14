@@ -2,3 +2,5 @@
 /venv
 /.idea
 */__pychache__
+/data/UCR/
+/data/Missing_value_and_variable_length_datasets_adjusted/

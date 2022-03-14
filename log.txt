@@ -1,0 +1,417 @@
+"C:\Users\Antoni\Documents\Programowanie\Duże projekty\Mine Your Decisions\venv\Scripts\python.exe" "C:/Users/Antoni/Documents/Programowanie/Duże projekty/Mine Your Decisions/main.py"
+Set: ACSF1. Time series length: 1460. Train/test size: (99, 99).
+  Fuzzy: 61.61616% (32.385 s)
+  DTW:   60.60606% (43.429 s)
+
+Set: Adiac. Time series length: 176. Train/test size: (390, 389).
+  Fuzzy: 33.16195% (12.562 s)
+  DTW:   53.21337% (9.670 s)
+
+Set: AllGestureWiimoteX. Time series length: 500. Train/test size: (699, 299).
+C:\Users\Antoni\Documents\Programowanie\Duże projekty\Mine Your Decisions\venv\lib\site-packages\sklearn\preprocessing\_data.py:1187: RuntimeWarning: All-NaN slice encountered
+  max_abs = np.nanmax(np.abs(X), axis=0)
+An error occured. Skipping dataset.
+Set: AllGestureWiimoteY. Time series length: 500. Train/test size: (699, 299).
+An error occured. Skipping dataset.
+C:\Users\Antoni\Documents\Programowanie\Duże projekty\Mine Your Decisions\venv\lib\site-packages\sklearn\preprocessing\_data.py:1187: RuntimeWarning: All-NaN slice encountered
+  max_abs = np.nanmax(np.abs(X), axis=0)
+Set: AllGestureWiimoteZ. Time series length: 500. Train/test size: (699, 299).
+An error occured. Skipping dataset.
+C:\Users\Antoni\Documents\Programowanie\Duże projekty\Mine Your Decisions\venv\lib\site-packages\sklearn\preprocessing\_data.py:1187: RuntimeWarning: All-NaN slice encountered
+  max_abs = np.nanmax(np.abs(X), axis=0)
+Set: ArrowHead. Time series length: 251. Train/test size: (174, 35).
+  Fuzzy: 82.85714% (5.030 s)
+  DTW:   80.00000% (1.172 s)
+
+Set: Beef. Time series length: 470. Train/test size: (29, 29).
+  Fuzzy: 72.41379% (3.265 s)
+  DTW:   48.27586% (0.781 s)
+
+Set: BeetleFly. Time series length: 512. Train/test size: (19, 19).
+  Fuzzy: 73.68421% (2.437 s)
+  DTW:   78.94737% (0.531 s)
+
+Set: BirdChicken. Time series length: 512. Train/test size: (19, 19).
+  Fuzzy: 84.21053% (2.439 s)
+  DTW:   63.15789% (0.500 s)
+
+Set: BME. Time series length: 128. Train/test size: (149, 29).
+  Fuzzy: 100.00000% (2.359 s)
+  DTW:   100.00000% (0.391 s)
+
+Set: Car. Time series length: 577. Train/test size: (59, 59).
+  Fuzzy: 61.01695% (7.764 s)
+  DTW:   49.15254% (3.390 s)
+
+Set: CBF. Time series length: 128. Train/test size: (899, 29).
+  Fuzzy: 100.00000% (10.357 s)
+  DTW:   100.00000% (2.361 s)
+
+Set: Chinatown. Time series length: 24. Train/test size: (342, 19).
+  Fuzzy: 57.89474% (0.969 s)
+  DTW:   100.00000% (0.063 s)
+
+Set: ChlorineConcentration. Time series length: 166. Train/test size: (3839, 466).
+  Fuzzy: 58.58369% (57.085 s)
+  DTW:   88.84120% (226.629 s)
+
+Set: CinCECGTorso. Time series length: 1639. Train/test size: (1379, 39).
+  Fuzzy: 97.43590% (203.931 s)
+  DTW:   94.87179% (797.997 s)
+
+Set: Coffee. Time series length: 286. Train/test size: (27, 27).
+  Fuzzy: 100.00000% (1.968 s)
+  DTW:   88.88889% (0.141 s)
+
+Set: Computers. Time series length: 720. Train/test size: (249, 249).
+  Fuzzy: 58.23293% (32.427 s)
+  DTW:   59.83936% (174.573 s)
+
+Set: CricketX. Time series length: 300. Train/test size: (389, 389).
+  Fuzzy: 41.13111% (20.822 s)
+  DTW:   63.23907% (74.795 s)
+
+Set: CricketY. Time series length: 300. Train/test size: (389, 389).
+  Fuzzy: 50.89974% (20.776 s)
+  DTW:   62.21080% (74.760 s)
+
+Set: CricketZ. Time series length: 300. Train/test size: (389, 389).
+  Fuzzy: 45.24422% (21.026 s)
+  DTW:   66.58098% (74.686 s)
+
+Set: Crop. Time series length: 46. Train/test size: (16799, 7199).
+  Fuzzy: 24.12835% (52.488 s)
+  DTW:   69.49576% (1792.984 s)
+
+Set: DiatomSizeReduction. Time series length: 345. Train/test size: (305, 15).
+  Fuzzy: 100.00000% (10.091 s)
+  DTW:   100.00000% (0.953 s)
+
+Set: DistalPhalanxOutlineAgeGroup. Time series length: 80. Train/test size: (138, 399).
+  Fuzzy: 82.45614% (4.124 s)
+  DTW:   80.95238% (1.390 s)
+
+Set: DistalPhalanxOutlineCorrect. Time series length: 80. Train/test size: (275, 599).
+  Fuzzy: 79.29883% (6.264 s)
+  DTW:   78.63105% (4.249 s)
+
+Set: DistalPhalanxTW. Time series length: 80. Train/test size: (138, 399).
+  Fuzzy: 79.94987% (4.108 s)
+  DTW:   76.19048% (1.375 s)
+
+Set: DodgerLoopDay. Time series length: 288. Train/test size: (79, 77).
+An error occured. Skipping dataset.
+Set: DodgerLoopGame. Time series length: 288. Train/test size: (137, 19).
+An error occured. Skipping dataset.
+Set: DodgerLoopWeekend. Time series length: 288. Train/test size: (137, 19).
+An error occured. Skipping dataset.
+Set: Earthquakes. Time series length: 512. Train/test size: (138, 321).
+  Fuzzy: 82.24299% (21.761 s)
+  DTW:   79.75078% (63.898 s)
+
+Set: ECG200. Time series length: 96. Train/test size: (99, 99).
+  Fuzzy: 85.85859% (2.328 s)
+  DTW:   84.84848% (0.469 s)
+
+Set: ECG5000. Time series length: 140. Train/test size: (4499, 499).
+  Fuzzy: 89.37876% (54.456 s)
+  DTW:   95.59118% (221.273 s)
+
+Set: ECGFiveDays. Time series length: 136. Train/test size: (860, 22).
+  Fuzzy: 90.90909% (10.341 s)
+  DTW:   95.45455% (1.890 s)
+
+Set: ElectricDevices. Time series length: 96. Train/test size: (7710, 8925).
+  Fuzzy: 55.43978% (109.506 s)
+  DTW:   65.04202% (3841.755 s)
+
+Set: EOGHorizontalSignal. Time series length: 1250. Train/test size: (361, 361).
+  Fuzzy: 49.03047% (85.105 s)
+  DTW:   48.47645% (1090.136 s)
+
+Set: EOGVerticalSignal. Time series length: 1250. Train/test size: (361, 361).
+  Fuzzy: 29.91690% (85.168 s)
+  DTW:   30.47091% (1104.710 s)
+
+Set: EthanolLevel. Time series length: 1751. Train/test size: (499, 503).
+  Fuzzy: 42.54473% (157.573 s)
+  DTW:   25.64612% (1782.396 s)
+
+Set: FaceAll. Time series length: 131. Train/test size: (1689, 559).
+  Fuzzy: 55.45617% (24.244 s)
+  DTW:   91.23435% (91.463 s)
+
+Set: FaceFour. Time series length: 350. Train/test size: (87, 23).
+  Fuzzy: 100.00000% (4.468 s)
+  DTW:   95.65217% (1.328 s)
+
+Set: FacesUCR. Time series length: 131. Train/test size: (2049, 199).
+  Fuzzy: 64.32161% (24.010 s)
+  DTW:   95.47739% (39.788 s)
+
+Set: FiftyWords. Time series length: 270. Train/test size: (454, 449).
+  Fuzzy: 41.87082% (21.714 s)
+  DTW:   60.35635% (79.560 s)
+
+Set: Fish. Time series length: 463. Train/test size: (174, 174).
+  Fuzzy: 75.86207% (15.168 s)
+  DTW:   72.41379% (16.652 s)
+
+Set: FordA. Time series length: 500. Train/test size: (1319, 3600).
+  Fuzzy: 62.52778% (213.544 s)
+  DTW:   58.11111% (6524.418 s)
+
+Set: FordB. Time series length: 500. Train/test size: (809, 3635).
+  Fuzzy: 58.76204% (194.345 s)
+  DTW:   63.65887% (4042.477 s)
+
+Set: FreezerRegularTrain. Time series length: 301. Train/test size: (2849, 149).
+  Fuzzy: 91.27517% (76.138 s)
+  DTW:   95.30201% (155.573 s)
+
+Set: FreezerSmallTrain. Time series length: 301. Train/test size: (2849, 27).
+  Fuzzy: 88.88889% (72.842 s)
+  DTW:   100.00000% (27.978 s)
+
+Set: Fungi. Time series length: 201. Train/test size: (185, 17).
+  Fuzzy: 100.00000% (3.921 s)
+  DTW:   70.58824% (0.687 s)
+
+Set: GestureMidAirD1. Time series length: 360. Train/test size: (129, 207).
+An error occured. Skipping dataset.
+Set: GestureMidAirD2. Time series length: 360. Train/test size: (129, 207).
+An error occured. Skipping dataset.
+Set: GestureMidAirD3. Time series length: 360. Train/test size: (129, 207).
+An error occured. Skipping dataset.
+Set: GesturePebbleZ1. Time series length: 455. Train/test size: (171, 131).
+An error occured. Skipping dataset.
+C:\Users\Antoni\Documents\Programowanie\Duże projekty\Mine Your Decisions\venv\lib\site-packages\sklearn\preprocessing\_data.py:1187: RuntimeWarning: All-NaN slice encountered
+  max_abs = np.nanmax(np.abs(X), axis=0)
+Set: GesturePebbleZ2. Time series length: 455. Train/test size: (157, 145).
+C:\Users\Antoni\Documents\Programowanie\Duże projekty\Mine Your Decisions\venv\lib\site-packages\sklearn\preprocessing\_data.py:1187: RuntimeWarning: All-NaN slice encountered
+  max_abs = np.nanmax(np.abs(X), axis=0)
+An error occured. Skipping dataset.
+Set: GunPoint. Time series length: 150. Train/test size: (149, 49).
+  Fuzzy: 97.95918% (2.984 s)
+  DTW:   95.91837% (0.640 s)
+
+Set: GunPointAgeSpan. Time series length: 150. Train/test size: (315, 134).
+  Fuzzy: 96.26866% (6.186 s)
+  DTW:   98.50746% (4.952 s)
+
+Set: GunPointMaleVersusFemale. Time series length: 150. Train/test size: (315, 134).
+  Fuzzy: 99.25373% (6.217 s)
+  DTW:   100.00000% (4.936 s)
+
+Set: GunPointOldVersusYoung. Time series length: 150. Train/test size: (314, 135).
+  Fuzzy: 100.00000% (6.311 s)
+  DTW:   100.00000% (4.983 s)
+
+Set: Ham. Time series length: 431. Train/test size: (104, 108).
+  Fuzzy: 77.77778% (8.685 s)
+  DTW:   63.88889% (10.076 s)
+
+Set: HandOutlines. Time series length: 2709. Train/test size: (369, 999).
+  Fuzzy: 85.38539% (337.187 s)
+  DTW:   79.47948% (8484.206 s)
+
+Set: Haptics. Time series length: 1092. Train/test size: (307, 154).
+  Fuzzy: 61.68831% (45.646 s)
+  DTW:   47.40260% (255.472 s)
+
+Set: Herring. Time series length: 512. Train/test size: (63, 63).
+  Fuzzy: 58.73016% (7.358 s)
+  DTW:   58.73016% (2.578 s)
+
+Set: HouseTwenty. Time series length: 2000. Train/test size: (118, 39).
+  Fuzzy: 92.30769% (29.665 s)
+  DTW:   97.43590% (102.320 s)
+
+Set: InlineSkate. Time series length: 1882. Train/test size: (549, 99).
+  Fuzzy: 31.31313% (115.518 s)
+  DTW:   48.48485% (967.340 s)
+
+Set: InsectEPGRegularTrain. Time series length: 601. Train/test size: (248, 61).
+  Fuzzy: 100.00000% (17.152 s)
+  DTW:   100.00000% (28.915 s)
+
+Set: InsectEPGSmallTrain. Time series length: 601. Train/test size: (248, 16).
+  Fuzzy: 100.00000% (14.559 s)
+  DTW:   100.00000% (7.530 s)
+
+Set: InsectWingbeatSound. Time series length: 256. Train/test size: (1979, 219).
+  Fuzzy: 61.64384% (47.919 s)
+  DTW:   55.70776% (153.743 s)
+
+Set: ItalyPowerDemand. Time series length: 24. Train/test size: (1028, 66).
+  Fuzzy: 75.75758% (1.968 s)
+  DTW:   96.96970% (0.469 s)
+
+Set: LargeKitchenAppliances. Time series length: 720. Train/test size: (374, 374).
+  Fuzzy: 62.83422% (48.457 s)
+  DTW:   66.84492% (399.358 s)
+
+Set: Lightning2. Time series length: 637. Train/test size: (60, 59).
+  Fuzzy: 86.44068% (8.607 s)
+  DTW:   76.27119% (6.905 s)
+
+Set: Lightning7. Time series length: 319. Train/test size: (72, 69).
+  Fuzzy: 65.21739% (5.186 s)
+  DTW:   68.11594% (2.609 s)
+
+Set: Mallat. Time series length: 1024. Train/test size: (2344, 54).
+  Fuzzy: 96.29630% (213.070 s)
+  DTW:   98.14815% (327.241 s)
+
+Set: Meat. Time series length: 448. Train/test size: (59, 59).
+  Fuzzy: 98.30508% (6.035 s)
+  DTW:   83.05085% (1.656 s)
+
+Set: MedicalImages. Time series length: 99. Train/test size: (759, 380).
+  Fuzzy: 56.05263% (9.692 s)
+  DTW:   77.63158% (15.512 s)
+
+Set: MelbournePedestrian. Time series length: 24. Train/test size: (2438, 1193).
+An error occured. Skipping dataset.
+Set: MiddlePhalanxOutlineAgeGroup. Time series length: 80. Train/test size: (153, 399).
+  Fuzzy: 79.69925% (4.608 s)
+  DTW:   79.19799% (1.343 s)
+
+Set: MiddlePhalanxOutlineCorrect. Time series length: 80. Train/test size: (290, 599).
+  Fuzzy: 52.42070% (6.600 s)
+  DTW:   70.78464% (3.655 s)
+
+Set: MiddlePhalanxTW. Time series length: 80. Train/test size: (153, 398).
+  Fuzzy: 63.06533% (4.287 s)
+  DTW:   64.07035% (1.250 s)
+
+Set: MixedShapesRegularTrain. Time series length: 1024. Train/test size: (2424, 499).
+  Fuzzy: 82.16433% (259.390 s)
+  DTW:   90.38076% (6493.941 s)
+
+Set: MixedShapesSmallTrain. Time series length: 1024. Train/test size: (2424, 99).
+  Fuzzy: 83.83838% (222.559 s)
+  DTW:   94.94949% (1282.417 s)
+
+Set: MoteStrain. Time series length: 84. Train/test size: (1251, 19).
+  Fuzzy: 78.94737% (8.779 s)
+  DTW:   89.47368% (0.953 s)
+
+Set: NonInvasiveFetalECGThorax1. Time series length: 750. Train/test size: (1964, 1799).
+  Fuzzy: 58.97721% (243.736 s)
+  DTW:   74.31907% (7065.717 s)
+
+Set: NonInvasiveFetalECGThorax2. Time series length: 750. Train/test size: (1964, 1799).
+  Fuzzy: 69.20511% (243.936 s)
+  DTW:   83.04614% (6396.599 s)
+
+Set: OliveOil. Time series length: 570. Train/test size: (29, 29).
+  Fuzzy: 93.10345% (3.937 s)
+  DTW:   86.20690% (0.422 s)
+
+Set: OSULeaf. Time series length: 427. Train/test size: (241, 199).
+  Fuzzy: 44.22111% (17.090 s)
+  DTW:   67.33668% (46.880 s)
+
+Set: PhalangesOutlinesCorrect. Time series length: 80. Train/test size: (857, 1799).
+  Fuzzy: 62.86826% (17.449 s)
+  DTW:   76.37576% (32.524 s)
+
+Set: Phoneme. Time series length: 1024. Train/test size: (1895, 213).
+  Fuzzy: 16.43192% (187.965 s)
+  DTW:   39.90610% (2344.601 s)
+
+Set: PickupGestureWiimoteZ. Time series length: 361. Train/test size: (49, 49).
+An error occured. Skipping dataset.
+C:\Users\Antoni\Documents\Programowanie\Duże projekty\Mine Your Decisions\venv\lib\site-packages\sklearn\preprocessing\_data.py:1187: RuntimeWarning: All-NaN slice encountered
+  max_abs = np.nanmax(np.abs(X), axis=0)
+Set: PigAirwayPressure. Time series length: 2000. Train/test size: (207, 103).
+  Fuzzy: 8.73786% (57.127 s)
+  DTW:   8.73786% (442.651 s)
+
+Set: PigArtPressure. Time series length: 2000. Train/test size: (207, 103).
+  Fuzzy: 13.59223% (56.987 s)
+  DTW:   33.98058% (471.687 s)
+
+Set: PigCVP. Time series length: 2000. Train/test size: (207, 103).
+  Fuzzy: 8.73786% (56.971 s)
+  DTW:   12.62136% (471.894 s)
+
+Set: PLAID. Time series length: 1344. Train/test size: (536, 536).
+An error occured. Skipping dataset.
+C:\Users\Antoni\Documents\Programowanie\Duże projekty\Mine Your Decisions\venv\lib\site-packages\sklearn\preprocessing\_data.py:1187: RuntimeWarning: All-NaN slice encountered
+  max_abs = np.nanmax(np.abs(X), axis=0)
+Set: Plane. Time series length: 144. Train/test size: (104, 104).
+  Fuzzy: 97.11538% (3.031 s)
+  DTW:   99.03846% (1.078 s)
+
+Set: PowerCons. Time series length: 144. Train/test size: (179, 179).
+  Fuzzy: 100.00000% (4.885 s)
+  DTW:   84.91620% (3.687 s)
+
+Set: ProximalPhalanxOutlineAgeGroup. Time series length: 80. Train/test size: (204, 399).
+  Fuzzy: 78.19549% (4.499 s)
+  DTW:   80.45113% (1.531 s)
+
+Set: ProximalPhalanxOutlineCorrect. Time series length: 80. Train/test size: (290, 599).
+  Fuzzy: 75.12521% (6.389 s)
+  DTW:   76.12688% (3.234 s)
+
+Set: ProximalPhalanxTW. Time series length: 80. Train/test size: (204, 399).
+  Fuzzy: 81.20301% (4.577 s)
+  DTW:   77.19298% (1.578 s)
+
+Set: RefrigerationDevices. Time series length: 720. Train/test size: (374, 374).
+  Fuzzy: 49.46524% (48.379 s)
+  DTW:   50.00000% (399.030 s)
+
+Set: Rock. Time series length: 2844. Train/test size: (49, 19).
+  Fuzzy: 73.68421% (22.010 s)
+  DTW:   63.15789% (39.116 s)
+
+Set: ScreenType. Time series length: 720. Train/test size: (374, 374).
+  Fuzzy: 41.71123% (48.364 s)
+  DTW:   38.50267% (393.341 s)
+
+Set: SemgHandGenderCh2. Time series length: 1500. Train/test size: (599, 299).
+  Fuzzy: 84.61538% (119.987 s)
+  DTW:   87.62542% (2242.238 s)
+
+Set: SemgHandMovementCh2. Time series length: 1500. Train/test size: (449, 449).
+  Fuzzy: 66.81514% (120.862 s)
+  DTW:   73.94209% (2531.670 s)
+
+Set: SemgHandSubjectCh2. Time series length: 1500. Train/test size: (449, 449).
+  Fuzzy: 76.16927% (121.587 s)
+  DTW:   79.28731% (2577.890 s)
+
+Set: ShakeGestureWiimoteZ. Time series length: 385. Train/test size: (49, 49).
+An error occured. Skipping dataset.
+C:\Users\Antoni\Documents\Programowanie\Duże projekty\Mine Your Decisions\venv\lib\site-packages\sklearn\preprocessing\_data.py:1187: RuntimeWarning: All-NaN slice encountered
+  max_abs = np.nanmax(np.abs(X), axis=0)
+Set: ShapeletSim. Time series length: 500. Train/test size: (179, 19).
+  Fuzzy: 52.63158% (9.683 s)
+  DTW:   84.21053% (4.842 s)
+
+Set: ShapesAll. Time series length: 512. Train/test size: (599, 599).
+  Fuzzy: 53.08848% (56.380 s)
+  DTW:   68.28047% (495.560 s)
+
+Set: SmallKitchenAppliances. Time series length: 720. Train/test size: (374, 374).
+  Fuzzy: 58.28877% (49.800 s)
+  DTW:   65.24064% (407.294 s)
+
+Set: SmoothSubspace. Time series length: 15. Train/test size: (149, 149).
+  Fuzzy: 84.56376% (0.670 s)
+  DTW:   79.19463% (0.180 s)
+
+Set: SonyAIBORobotSurface1. Time series length: 70. Train/test size: (600, 19).
+  Fuzzy: 89.47368% (3.955 s)
+  DTW:   100.00000% (0.368 s)
+
+Set: SonyAIBORobotSurface2. Time series length: 65. Train/test size: (952, 26).
+  Fuzzy: 88.46154% (5.403 s)
+  DTW:   100.00000% (0.699 s)
+
+Set: StarLightCurves. Time series length: 1024. Train/test size: (8235, 999).
+  Fuzzy: 84.78478% (808.179 s)
