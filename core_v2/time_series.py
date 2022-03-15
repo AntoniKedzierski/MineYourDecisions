@@ -234,4 +234,4 @@ class TimeSeries:
 
 if __name__ == '__main__':
 
-    print(apple.join(cat))
+        print(apple.join(cat))

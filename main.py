@@ -42,11 +42,13 @@ def dtw_metric(x, y):
     return dtaidistance.dtw.distance_fast(x, y, use_pruning=True)
 
 
-if __name__ == '__main__':
-    results = { 'dataset': [], 'train_size': [], 'test_size': [], 'ts_length': [], 'fuzzy': [], 'dtw': [], 'fuzzy_eval_time': [], 'dtw_eval_time': [] }
+def evaluate_ucr():
+    results = {'dataset': [], 'train_size': [], 'test_size': [], 'ts_length': [], 'fuzzy': [], 'dtw': [],
+               'fuzzy_eval_time': [], 'dtw_eval_time': []}
     for set in os.listdir('data/UCR'):
         train_set, train_label, test_set, test_label = unpack(set)
-        print(f'Set: {set}. Time series length: {len(train_set[0, 0])}. Train/test size: ({train_set.shape[0]}, {test_set.shape[0]}).')
+        print(
+            f'Set: {set}. Time series length: {len(train_set[0, 0])}. Train/test size: ({train_set.shape[0]}, {test_set.shape[0]}).')
         h = max(10, train_set.shape[0] ** 0.5)
 
         fuzzy = Pipeline([
@@ -89,8 +91,8 @@ if __name__ == '__main__':
             results['test_size'].append(test_set.shape[0])
             results['ts_length'].append(len(train_set[0, 0]))
             results['fuzzy'].append(acc_fuzzy)
-            results['fuzzy_eval_time'] = end_fuzzy - start_fuzzy
-            results['dtw_eval_time'] = end_dtw - start_dtw
+            results['fuzzy_eval_time'].append(end_fuzzy - start_fuzzy)
+            results['dtw_eval_time'].append(end_dtw - start_dtw)
             results['dtw'].append(acc_dtw)
 
         except:
@@ -98,3 +100,8 @@ if __name__ == '__main__':
             continue
 
     pd.DataFrame(results).to_csv('results/eval_all_1.csv')
+
+
+if __name__ == '__main__':
+    train_set, train_labels, test_set, test_labels = unpack('Rock')
+    test_set[0].plot()

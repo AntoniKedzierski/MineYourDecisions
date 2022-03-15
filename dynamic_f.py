@@ -191,7 +191,6 @@ class DynamicFTransform:
 
 
     def to_minimize(self, x, gradient=True):
-        self.plot_sets()
         self.optim_iter += 1
 
         self.x1 = x[:self.n_splits]
@@ -200,8 +199,10 @@ class DynamicFTransform:
 
         loss = self.loss_function
         print(f'Iteration {self.optim_iter}, loss: {loss}')
-        print(self.x1)
-        print(self.x2)
+
+        x = np.linspace(max(self.x1[0], self.x2[0]), max(self.x1[-1], self.x2[-1]), 1000)
+        self.plot_sets()
+        self.plot_inv(x)
 
         if gradient:
             return loss, self.gradient
@@ -213,15 +214,17 @@ class DynamicFTransform:
 
         for i in range(len(x)):
             x_arg = x[i]
-            if x_arg <= self.x1[1] or x_arg >= self.x1[-2]:
-                result1[i] = None
-            if x_arg <= self.x2[1] or x_arg >= self.x2[-2]:
-                result2[i] = None
+
             for j in range(1, self.n_coef - 1):
                 a, b, c = self.x1[j], self.x1[j + 1], self.x1[j + 2]
                 result1[i] += max(0, min((x_arg - a) / (b - a), (c - x_arg) / (c - b))) * self.coef1[j]
                 a, b, c = self.x2[j], self.x2[j + 1], self.x2[j + 2]
                 result2[i] += max(0, min((x_arg - a) / (b - a), (c - x_arg) / (c - b))) * self.coef2[j]
+
+            if x_arg <= self.x1[2] or x_arg >= self.x1[-3]:
+                result1[i] = None
+            if x_arg <= self.x2[2] or x_arg >= self.x2[-3]:
+                result2[i] = None
 
         return result1, result2
 
@@ -244,8 +247,8 @@ class DynamicFTransform:
             plot_series += [f'set_{i}_1', f'set_{i}_2']
             maks = abs(max(max(self.f1(x)), max(self.f2(x))))
             for j in range(plot_n):
-                plot_data[f'set_{i}_1'][j] = max(0, min((x[j] - a1) / (b1 - a1), (c1 - x[j]) / (c1 - b1))) / (maks * 10)
-                plot_data[f'set_{i}_2'][j] = maks + 0.3 - max(0, min((x[j] - a2) / (b2 - a2), (c2 - x[j]) / (c2 - b2))) / (maks * 10)
+                plot_data[f'set_{i}_1'][j] = max(0, min((x[j] - a1) / (b1 - a1), (c1 - x[j]) / (c1 - b1))) / 3
+                plot_data[f'set_{i}_2'][j] = 1 - max(0, min((x[j] - a2) / (b2 - a2), (c2 - x[j]) / (c2 - b2))) / 3
                 if x[j] < a1 or x[j] > c1:
                     plot_data[f'set_{i}_1'][j] = None
                 if x[j] < a2 or x[j] > c2:
@@ -264,6 +267,6 @@ if __name__ == '__main__':
     apple = TimeSeries.read_csv('data/djia_composite/AAPL.csv', name='Apple')
     cat = TimeSeries.read_csv('data/djia_composite/CAT.csv', name='Caterpillar')
 
-    df = DynamicFTransform(n_coef=50)
+    df = DynamicFTransform(n_coef=10)
     df.fit(apple, cat)
 
