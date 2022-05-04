@@ -1,0 +1,135 @@
+Set: PowerCons. Time series length: 144. Train/test size: (180, 180).
+  Fuzzy: 100.00000% (5.743 s)
+  DTW:   91.11111% (0.622 s)
+
+Set: Chinatown. Time series length: 24. Train/test size: (20, 343).
+  Fuzzy: 97.95918% (0.988 s)
+  DTW:   97.66764% (0.072 s)
+
+Set: Adiac. Time series length: 176. Train/test size: (390, 391).
+  Fuzzy: 42.71100% (14.645 s)
+  DTW:   43.73402% (3.386 s)
+
+Set: Beef. Time series length: 470. Train/test size: (30, 30).
+  Fuzzy: 80.00000% (3.384 s)
+  DTW:   53.33333% (0.058 s)
+
+Set: BME. Time series length: 128. Train/test size: (30, 150).
+  Fuzzy: 99.33333% (2.639 s)
+  DTW:   75.33333% (0.095 s)
+
+Set: TwoPatterns. Time series length: 128. Train/test size: (1000, 4000).
+  Fuzzy: 76.65000% (69.320 s)
+  DTW:   99.85000% (67.358 s)
+
+Set: ECG200. Time series length: 96. Train/test size: (100, 100).
+  Fuzzy: 81.00000% (2.238 s)
+  DTW:   84.00000% (0.152 s)
+
+Set: CBF. Time series length: 128. Train/test size: (30, 900).
+  Fuzzy: 85.44444% (13.108 s)
+  DTW:   90.77778% (0.519 s)
+
+Set: Fish. Time series length: 463. Train/test size: (175, 175).
+  Fuzzy: 77.71429% (16.666 s)
+  DTW:   77.14286% (1.605 s)
+
+Set: WordSynonyms. Time series length: 270. Train/test size: (267, 638).
+  Fuzzy: 50.94044% (24.195 s)
+  DTW:   62.69592% (5.435 s)
+
+Set: Strawberry. Time series length: 235. Train/test size: (613, 370).
+  Fuzzy: 95.13514% (24.152 s)
+  DTW:   92.16216% (6.403 s)
+
+Set: Fungi. Time series length: 201. Train/test size: (18, 186).
+  Fuzzy: 72.58065% (4.272 s)
+  DTW:   19.89247% (0.102 s)
+
+Set: Trace. Time series length: 275. Train/test size: (100, 100).
+  Fuzzy: 85.00000% (5.725 s)
+  DTW:   91.00000% (0.340 s)
+
+Set: FiftyWords. Time series length: 270. Train/test size: (450, 455).
+  Fuzzy: 57.14286% (24.015 s)
+  DTW:   68.35165% (6.495 s)
+
+Set: Ham. Time series length: 431. Train/test size: (109, 105).
+  Fuzzy: 70.47619% (9.467 s)
+  DTW:   66.66667% (0.571 s)
+
+Set: ElectricDevices. Time series length: 96. Train/test size: (8926, 7711).
+  Fuzzy: 58.30632% (176.027 s)
+  DTW:   64.24588% (923.284 s)
+
+Set: Coffee. Time series length: 286. Train/test size: (28, 28).
+  Fuzzy: 100.00000% (1.901 s)
+  DTW:   89.28571% (0.036 s)
+
+Set: Wine. Time series length: 234. Train/test size: (57, 54).
+  Fuzzy: 62.96296% (3.002 s)
+  DTW:   68.51852% (0.097 s)
+
+Set: GunPoint. Time series length: 150. Train/test size: (50, 150).
+  Fuzzy: 92.00000% (3.238 s)
+  DTW:   95.33333% (0.162 s)
+
+Set: Crop. Time series length: 46. Train/test size: (7200, 16800).
+  Fuzzy: 60.08929% (126.549 s)
+  DTW:   66.83333% (996.299 s)
+
+Set: BeetleFly. Time series length: 512. Train/test size: (20, 20).
+  Fuzzy: 85.00000% (2.572 s)
+  DTW:   90.00000% (0.033 s)
+
+Set: Wafer. Time series length: 152. Train/test size: (1000, 6164).
+  Fuzzy: 97.82609% (109.113 s)
+  DTW:   99.20506% (118.879 s)
+
+Set: FaceFour. Time series length: 350. Train/test size: (24, 88).
+  Fuzzy: 78.40909% (4.530 s)
+  DTW:   81.81818% (0.103 s)
+
+Set: BirdChicken. Time series length: 512. Train/test size: (20, 20).
+  Fuzzy: 60.00000% (2.624 s)
+  DTW:   55.00000% (0.032 s)
+
+Set: SmoothSubspace. Time series length: 15. Train/test size: (150, 150).
+  Fuzzy: 80.66667% (0.516 s)
+  DTW:   84.66667% (0.189 s)
+
+Set: ShapesAll. Time series length: 512. Train/test size: (600, 600).
+  Fuzzy: 65.66667% (59.791 s)
+  DTW:   68.66667% (20.483 s)
+
+Set: UMD. Time series length: 150. Train/test size: (36, 144).
+  Fuzzy: 90.97222% (2.868 s)
+  DTW:   84.02778% (0.118 s)
+
+Set: ItalyPowerDemand. Time series length: 24. Train/test size: (67, 1029).
+  Fuzzy: 91.73955% (2.888 s)
+  DTW:   94.65500% (0.487 s)
+
+Set: Symbols. Time series length: 398. Train/test size: (25, 995).
+  Fuzzy: 88.04020% (42.477 s)
+  DTW:   78.29146% (1.226 s)
+
+Set: SwedishLeaf. Time series length: 128. Train/test size: (500, 625).
+  Fuzzy: 80.64000% (16.338 s)
+  DTW:   78.72000% (5.507 s)
+
+Set: MoteStrain. Time series length: 84. Train/test size: (20, 1252).
+  Fuzzy: 85.46326% (11.850 s)
+  DTW:   83.78594% (0.396 s)
+
+Set: Yoga. Time series length: 426. Train/test size: (300, 3000).
+  Fuzzy: 81.36667% (135.862 s)
+  DTW:   77.96667% (43.348 s)
+
+Set: Meat. Time series length: 448. Train/test size: (60, 60).
+  Fuzzy: 93.33333% (5.905 s)
+  DTW:   93.33333% (0.194 s)
+
+Set: Plane. Time series length: 144. Train/test size: (105, 105).
+  Fuzzy: 98.09524% (3.418 s)
+  DTW:   97.14286% (0.225 s)

@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import typing
 import numbers
 
+from core_v2.fuzzy import triang_fuzzy
+
 
 class TimeSeries:
     def __init__(self, *args, **kwargs):
@@ -12,7 +14,7 @@ class TimeSeries:
         value_names = ['values']
         value_columns = 'all'
         time_index_name = 'timestamp'
-        time_dtype = 'datetime'
+        time_dtype = 'datetime64[s]'
         time_column = 0
         no_time = False
 
@@ -96,6 +98,15 @@ class TimeSeries:
     def __len__(self):
         return self.values.shape[0]
 
+    def __add__(self, other):
+        return TimeSeries(self.values + other.values)
+
+    def __sub__(self, other):
+        return TimeSeries(self.values - other.values)
+
+    def __abs__(self):
+        return TimeSeries(abs(self.values))
+
 
     # ===================
     # Properites
@@ -116,7 +127,7 @@ class TimeSeries:
     # ===================
     # Utils
     # ===================
-    def plot(self, features='value'):
+    def plot(self, features='value', **kwargs):
         if features == 'value':
             sns.lineplot(x=self.time_index_name, y=self.value_names[0], data=self.df)
         elif isinstance(features, (pd.Series, np.ndarray, typing.Sequence)) or features == 'all':
@@ -131,7 +142,10 @@ class TimeSeries:
                         columns.append(f)
             plot_data = self.df.melt(id_vars=self.time_index_name, value_vars=columns, value_name='value', var_name='series')
             sns.lineplot(x=self.time_index_name, y='value', hue='series', data=plot_data)
-        plt.title(self.name)
+        if 'title' in kwargs:
+            plt.title(kwargs['title'])
+        else:
+            plt.title(self.name)
         plt.show()
 
 
@@ -181,7 +195,7 @@ class TimeSeries:
     def fuzzy_coefs(self, partition):
         if not isinstance(partition, (np.ndarray, pd.Series, typing.Sequence)):
             if isinstance(partition, numbers.Number):
-                partition = np.arange(self.enumaration[0], self.enumaration[-1] + partition, step=partition / 2)
+                partition = np.arange(self.enumaration[0], self.enumaration[-1] + partition / 2, step=partition / 2)
             else:
                 raise ValueError('Partition should be an iterative sequence, but %s was given.' % type(partition))
 
@@ -192,20 +206,35 @@ class TimeSeries:
 
         for i in range(n_coefs):
             a, b, c = partition[i], partition[i + 1], partition[i + 2]
-            int_1 = 0.0
-            int_2 = 0.0
-            for j in x[(x >= a) & (x <= b)]:
-                int_1 += (j - a) * self.values[j]
-            for j in x[(x >= b) & (x <= c)]:
-                int_1 += (c - j) * self.values[j]
-            coefs[i] = 2 / (c - a) * (int_1 / (b - a) + int_2 / (c - b))
+            memberships = triang_fuzzy(x, a, b, c)
+            coefs[i] = self.values @ memberships / np.sum(memberships)
 
         return coefs
 
-    def fuzzy_plot(self, partition):
+    def fuzzy_inverse(self, partition):
         if not isinstance(partition, (np.ndarray, pd.Series, typing.Sequence)):
             if isinstance(partition, numbers.Number):
-                partition = np.arange(self.enumaration[0], self.enumaration[-1] + partition, step=partition)
+                partition = np.arange(self.enumaration[0], self.enumaration[-1] + partition / 2, step=partition / 2)
+            else:
+                raise ValueError('Partition should be an iterative sequence, but %s was given.' % type(partition))
+        coefs = self.fuzzy_coefs(partition)
+        domain = self.enumaration
+        y = np.zeros(domain.shape[0])
+
+        for i in range(domain.shape[0]):
+            for j in range(partition.shape[0] - 2):
+                a, b, c = partition[j], partition[j + 1], partition[j + 2]
+                x = domain[i]
+                y[i] += max(0, min((x - a) / (b - a), (c - x) / (c - b))) * coefs[j]
+            if domain[i] <= partition[1] or domain[i] >= partition[-2]:
+                y[i] = None
+
+        return TimeSeries(y)
+
+    def fuzzy_plot(self, partition, **kwargs):
+        if not isinstance(partition, (np.ndarray, pd.Series, typing.Sequence)):
+            if isinstance(partition, numbers.Number):
+                partition = np.arange(self.enumaration[0], self.enumaration[-1] + partition / 2, step=partition / 2)
             else:
                 raise ValueError('Partition should be an iterative sequence, but %s was given.' % type(partition))
         coefs = self.fuzzy_coefs(partition)
@@ -222,7 +251,32 @@ class TimeSeries:
 
         sns.lineplot(x=self.enumaration, y=self.values, linestyle='--', alpha=0.4)
         sns.lineplot(x=plot_x, y=plot_y)
+        if 'title' in kwargs:
+            plt.title(kwargs['title'])
+        else:
+            plt.title(self.name)
         plt.show()
+
+    def fuzzy_anomalies(self, partition):
+        return self.__sub__(self.fuzzy_inverse(partition))
+
+
+    # =====================
+    # Statistical analysis
+    # =====================
+    def abs_accumulation(self, window, accum_method='step'):
+        X = np.zeros((self.df.shape[0], window + 1))
+        X_abs_accum = np.zeros(self.df.shape[0])
+        for i in range(window + 1):
+            X[:, i] = self.df.loc[:, self.value_names].shift(i).to_numpy().flatten()
+        for i in range(self.df.shape[0]):
+            for j in range(window):
+                if accum_method == 'step':
+                    X_abs_accum[i] += abs(X[i, j] - X[i, j + 1])
+                if accum_method == 'reference':
+                    X_abs_accum[i] += abs(X[i, 0] - X[i, j + 1])
+        return TimeSeries(X_abs_accum)
+
 
     # ===================
     # Static methods
@@ -233,5 +287,5 @@ class TimeSeries:
 
 
 if __name__ == '__main__':
-
-        print(apple.join(cat))
+    apple = TimeSeries.read_csv('../data/djia_composite/CAT.csv')
+    apple.fuzzy_anomalies(6).plot()

@@ -2,6 +2,7 @@ import os
 import time
 import numpy as np
 import pandas as pd
+import math
 from scipy.spatial import distance
 
 from sklearn.pipeline import Pipeline
@@ -39,17 +40,32 @@ def get_values(column):
 
 
 def dtw_metric(x, y):
-    return dtaidistance.dtw.distance_fast(x, y, use_pruning=True)
+    return dtaidistance.dtw.distance_fast(x, y, window=10, use_pruning=True)
 
 
-def evaluate_ucr():
+def fuzzy_score(F1, F2):
+    return np.mean(np.abs(F1 - F2) / (np.abs(F1) + np.abs(F2)))
+
+
+def evaluate_ucr(datasets='all'):
     results = {'dataset': [], 'train_size': [], 'test_size': [], 'ts_length': [], 'fuzzy': [], 'dtw': [],
-               'fuzzy_eval_time': [], 'dtw_eval_time': []}
-    for set in os.listdir('data/UCR'):
-        train_set, train_label, test_set, test_label = unpack(set)
-        print(
-            f'Set: {set}. Time series length: {len(train_set[0, 0])}. Train/test size: ({train_set.shape[0]}, {test_set.shape[0]}).')
-        h = max(10, train_set.shape[0] ** 0.5)
+               'fuzzy_eval_time': [], 'dtw_eval_time': []
+            }
+
+    sets = os.listdir('data/UCR')
+    if datasets != 'all':
+        sets = list(set(sets) & set(datasets))
+
+    for s in sets:
+        train_set, train_label, test_set, test_label = unpack(s)
+        ts_len = len(train_set[0, 0])
+
+        if ts_len > 512:
+            continue
+
+        print(f'Set: {s}. Time series length: {ts_len}. Train/test size: ({train_set.shape[0]}, {test_set.shape[0]}).')
+
+        h = math.ceil(max(8, ts_len ** 0.5))
 
         fuzzy = Pipeline([
             ('col_transformer', ColumnTransformer([
@@ -58,8 +74,18 @@ def evaluate_ucr():
                     ('max_scaler', MaxAbsScaler())
                 ]), 0)
             ])),
-            ('forest', RandomForestClassifier(max_depth=4, n_estimators=256, random_state=42, n_jobs=-1))
+            ('forest', RandomForestClassifier(max_depth=6, n_estimators=ts_len, random_state=42, n_jobs=-1))
         ])
+
+        # fuzzy_knn = Pipeline([
+        #     ('col_transformer', ColumnTransformer([
+        #         ('fuzzy_coefs', Pipeline([
+        #             ('fuzzy_coefs', FunctionTransformer(lambda x: get_fuzzy(x, h))),
+        #             ('max_scaler', MaxAbsScaler())
+        #         ]), 0)
+        #     ])),
+        #     ('forest', KNeighborsClassifier(metric=fuzzy_score, n_jobs=-1))
+        # ])
 
         dtw = Pipeline([
             ('col_transformer', ColumnTransformer([
@@ -70,6 +96,16 @@ def evaluate_ucr():
             ])),
             ('knn', KNeighborsClassifier(metric=dtw_metric, n_jobs=-1))
         ])
+
+        # fuzzy_dtw = Pipeline([
+        #     ('col_transformer', ColumnTransformer([
+        #         ('fuzzy_coefs', Pipeline([
+        #             ('fuzzy_coefs', FunctionTransformer(lambda x: get_fuzzy(x, h))),
+        #             ('max_scaler', MaxAbsScaler())
+        #         ]), 0)
+        #     ])),
+        #     ('knn', KNeighborsClassifier(metric=dtw_metric, n_jobs=-1))
+        # ])
 
         try:
             start_fuzzy = time.time()
@@ -84,24 +120,39 @@ def evaluate_ucr():
             pred_dtw = dtw.predict(test_set)
             acc_dtw = accuracy_score(test_label, pred_dtw)
             end_dtw = time.time()
-            print(f'  DTW:   {acc_dtw * 100:.5f}% ({end_dtw - start_dtw:.3f} s)\n')
+            print(f'  DTW:   {acc_dtw * 100:.5f}% ({end_dtw - start_dtw:.3f} s)')
 
-            results['dataset'].append(set)
+            # start_fuzzy_dtw = time.time()
+            # fuzzy_dtw.fit(train_set, train_label)
+            # pred_fuzzy_dtw = fuzzy_dtw.predict(test_set)
+            # acc_fuzzy_dtw = accuracy_score(test_label, pred_fuzzy_dtw)
+            # end_fuzzy_dtw = time.time()
+            # print(f'  Fuzzy DTW:   {acc_fuzzy_dtw * 100:.5f}% ({end_fuzzy_dtw - start_fuzzy_dtw:.3f} s)\n')
+
+            results['dataset'].append(s)
             results['train_size'].append(train_set.shape[0])
             results['test_size'].append(test_set.shape[0])
             results['ts_length'].append(len(train_set[0, 0]))
             results['fuzzy'].append(acc_fuzzy)
+            results['dtw'].append(acc_dtw)
+            # results['fuzzy_dtw'].append(acc_fuzzy_dtw)
+            # results['fuzzy_dtw_eval_time'].append(end_fuzzy_dtw - start_fuzzy_dtw)
             results['fuzzy_eval_time'].append(end_fuzzy - start_fuzzy)
             results['dtw_eval_time'].append(end_dtw - start_dtw)
-            results['dtw'].append(acc_dtw)
 
         except:
             print('An error occured. Skipping dataset.')
             continue
 
-    pd.DataFrame(results).to_csv('results/eval_all_1.csv')
+    pd.DataFrame(results).to_csv('results/eval_all_2.csv')
 
 
 if __name__ == '__main__':
-    train_set, train_labels, test_set, test_labels = unpack('Rock')
-    test_set[0].plot()
+    evaluate_ucr(datasets=[
+        'Adiac', 'Beef', 'BeetleFly', 'BirdChicken', 'BME', 'Car', 'CBF', 'Chinatown', 'Coffee', 'Computers', 'Crop',
+        'ECG200', 'ElectricDevices', 'EnthanolLevel', 'FaceFour', 'FiftyWords', 'Fish', 'Fungi', 'GunPoint', 'Ham',
+        'HandOutlines', 'Haptics', 'Heering', 'HouseTwenty', 'InlineSkate', 'ItalyPowerDemand', 'Mallat', 'Meat',
+        'MoteStrain', 'OliveOil',  'Phoneme', 'PLAID', 'Plane', 'PowerCons', 'Rock', 'ScreenType', 'RefrigerationDevices',
+        'ShapesAll', 'Symbols', 'Strawberry', 'StarLightCurves', 'SwedishLeaf', 'SmoothSubspace', 'SmallKitchenAppliances',
+        'Trace', 'TwoPatterns', 'UMD', 'Wafer', 'Wine', 'WordSynonyms', 'Worms', 'Yoga'
+    ])
