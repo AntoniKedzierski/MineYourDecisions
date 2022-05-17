@@ -1,9 +1,14 @@
+import copy
+import os
+
 import pandas as pd
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 import typing
 import numbers
+import functools
+
 
 from core_v2.fuzzy import triang_fuzzy
 
@@ -149,6 +154,16 @@ class TimeSeries:
         plt.show()
 
 
+    def max_scaling(self, inplace=False):
+        new_values = copy.deepcopy(self.df)
+        for c in new_values.columns[1:]:
+            new_values[c] /= max(np.abs(new_values[c]))
+
+        if not inplace:
+            return TimeSeries(new_values)
+        self.values = new_values
+
+
     # ===================
     # TS operations
     # ===================
@@ -211,25 +226,63 @@ class TimeSeries:
 
         return coefs
 
-    def fuzzy_inverse(self, partition):
+    # Higher order coefs
+    def fuzzy_slope_coefs(self, partition, functions=False):
         if not isinstance(partition, (np.ndarray, pd.Series, typing.Sequence)):
             if isinstance(partition, numbers.Number):
                 partition = np.arange(self.enumaration[0], self.enumaration[-1] + partition / 2, step=partition / 2)
             else:
                 raise ValueError('Partition should be an iterative sequence, but %s was given.' % type(partition))
-        coefs = self.fuzzy_coefs(partition)
+
+        partition = np.asarray(partition)
+        n_coefs = partition.shape[0] - 2
+        coefs = []
+        x = self.enumaration
+
+        def linear(x, a, b):
+            return a * x + b
+
+        for i in range(n_coefs):
+            a, b, c = partition[i], partition[i + 1], partition[i + 2]
+            memberships = triang_fuzzy(x, a, b, c)
+            beta_0 = self.values @ memberships / np.sum(memberships)
+            beta_1 = (self.values * (x - b)) @ memberships / (np.power(x - b, 2) @ memberships)
+
+            if functions:
+                p = functools.partial(linear, beta_1, beta_0)
+                coefs.append(p)
+            else:
+                coefs.append((beta_0, beta_1))
+
+        if functions:
+            return coefs
+        return np.asarray(coefs).reshape((-1, 2))
+
+
+    def fuzzy_inverse(self, partition, with_slope_coefs=False):
+        if not isinstance(partition, (np.ndarray, pd.Series, typing.Sequence)):
+            if isinstance(partition, numbers.Number):
+                partition = np.arange(self.enumaration[0], self.enumaration[-1] + partition / 2, step=partition / 2)
+            else:
+                raise ValueError('Partition should be an iterative sequence, but %s was given.' % type(partition))
+
         domain = self.enumaration
+        coefs = self.fuzzy_coefs(partition)
+        if with_slope_coefs:
+            slope_coefs = self.fuzzy_slope_coefs(partition)
+
         y = np.zeros(domain.shape[0])
 
         for i in range(domain.shape[0]):
             for j in range(partition.shape[0] - 2):
                 a, b, c = partition[j], partition[j + 1], partition[j + 2]
                 x = domain[i]
-                y[i] += max(0, min((x - a) / (b - a), (c - x) / (c - b))) * coefs[j]
+                y[i] += triang_fuzzy(x, a, b, c) * coefs[j]
             if domain[i] <= partition[1] or domain[i] >= partition[-2]:
                 y[i] = None
 
         return TimeSeries(y)
+
 
     def fuzzy_plot(self, partition, **kwargs):
         if not isinstance(partition, (np.ndarray, pd.Series, typing.Sequence)):
@@ -257,8 +310,58 @@ class TimeSeries:
             plt.title(self.name)
         plt.show()
 
+
+    def fuzzy_polyline(self, partition, **kwargs):
+        if not isinstance(partition, (np.ndarray, pd.Series, typing.Sequence)):
+            if isinstance(partition, numbers.Number):
+                partition = np.arange(self.enumaration[0], self.enumaration[-1] + partition / 2, step=partition / 2)
+            else:
+                raise ValueError('Partition should be an iterative sequence, but %s was given.' % type(partition))
+
+        lin_functions = self.fuzzy_slope_coefs(partition, functions=True)
+        plot_x = np.linspace(partition[0], partition[-1], 100)
+        plot_y_1 = np.zeros(plot_x.shape[0])
+        plot_y_2 = np.zeros(plot_x.shape[0])
+
+        for i in range(plot_x.shape[0]):
+            x = plot_x[i]
+            for j in range(partition.shape[0] - 2):
+                a, b, c = partition[j], partition[j + 1], partition[j + 2]
+                if x <= a or x > c:
+                    continue
+                if j % 2 == 0:
+                    plot_y_1[i] = lin_functions[j](x)
+                if j % 2 == 1:
+                    plot_y_2[i] = lin_functions[j](x)
+            if plot_x[i] <= partition[1] or plot_x[i] >= partition[-2]:
+                plot_y_1[i] = None
+                plot_y_2[i] = None
+
+        # sns.lineplot(x=self.enumaration, y=self.values, linestyle='--', alpha=0.4)
+        sns.lineplot(x=plot_x, y=plot_y_1)
+        sns.lineplot(x=plot_x, y=plot_y_2)
+        if 'title' in kwargs:
+            plt.title(kwargs['title'])
+        else:
+            plt.title(self.name)
+        plt.show()
+
+
     def fuzzy_anomalies(self, partition):
         return self.__sub__(self.fuzzy_inverse(partition))
+
+
+    def fuzzy_similariry(self, ts, h0, h1, kappa_0, kappa_1):
+        coefs_x_0 = self.max_scaling().fuzzy_coefs(h0)
+        coefs_x_1 = self.max_scaling().fuzzy_slope_coefs(h1)[:, 1].flatten()
+        coefs_y_0 = ts.max_scaling().fuzzy_coefs(h0)
+        coefs_y_1 = ts.max_scaling().fuzzy_slope_coefs(h1)[:, 1].flatten()
+
+        normalization = max(max(np.abs(coefs_y_0)), max(np.abs(coefs_y_1)))
+        factor_0 = kappa_0 * sum(np.abs(coefs_x_0 - coefs_y_0)) / (coefs_x_0.shape[0] - 1)
+        factor_1 = kappa_1 * (sum(np.abs(coefs_x_1 - coefs_y_1)) / normalization) / (coefs_x_1.shape[0] - 1)
+
+        return max(0, 1 - factor_0 + factor_1)
 
 
     # =====================
@@ -285,7 +388,32 @@ class TimeSeries:
     def read_csv(path, **kwargs):
         return TimeSeries(pd.read_csv(path), **kwargs)
 
+    @staticmethod
+    def similarity_score(x, y, h0, h1, kappa0, kappa1):
+        normalization = max(max(np.abs(x['deg1'])), max(np.abs(y['deg1'])))
+        factor_0 = kappa_0 * sum(np.abs(x['deg0'] - y['deg0'])) / (x['deg0'].shape[0] - 1)
+        factor_1 = kappa_1 * (sum(np.abs(x['deg1'] - y['deg1'])) / normalization) / (x['deg1'].shape[0] - 1)
+
+        return max(0, 1 - factor_0 + factor_1)
+
 
 if __name__ == '__main__':
-    apple = TimeSeries.read_csv('../data/djia_composite/CAT.csv')
-    apple.fuzzy_anomalies(6).plot()
+    all_stocks = []
+    for s in os.listdir('../data/djia_composite'):
+        ts = TimeSeries.read_csv(f'../data/djia_composite/{s}', name=s.split('.')[0])
+        all_stocks.append(ts)
+
+    n = len(all_stocks)
+    sim_scores = np.zeros(shape=(n, n))
+    for i in range(n):
+        sim_scores[i, i] = 1
+        for j in range(i + 1, n):
+            score = all_stocks[i].fuzzy_similariry(all_stocks[j], 5, 8, 1, 0.75)
+            sim_scores[i, j] = score
+            sim_scores[j, i] = score
+
+    print(sim_scores)
+
+
+
+

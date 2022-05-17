@@ -47,6 +47,10 @@ def fuzzy_score(F1, F2):
     return np.mean(np.abs(F1 - F2) / (np.abs(F1) + np.abs(F2)))
 
 
+def fuzzy_similarity(ts1, ts2, h0, h1, kappa0, kappa1):
+    return 1 - ts1.fuzzy_similarity(ts2, h0, h1, kappa0, kappa1)
+
+
 def evaluate_ucr(datasets='all'):
     results = {'dataset': [], 'train_size': [], 'test_size': [], 'ts_length': [], 'fuzzy': [], 'dtw': [],
                'fuzzy_eval_time': [], 'dtw_eval_time': []
@@ -77,15 +81,9 @@ def evaluate_ucr(datasets='all'):
             ('forest', RandomForestClassifier(max_depth=6, n_estimators=ts_len, random_state=42, n_jobs=-1))
         ])
 
-        # fuzzy_knn = Pipeline([
-        #     ('col_transformer', ColumnTransformer([
-        #         ('fuzzy_coefs', Pipeline([
-        #             ('fuzzy_coefs', FunctionTransformer(lambda x: get_fuzzy(x, h))),
-        #             ('max_scaler', MaxAbsScaler())
-        #         ]), 0)
-        #     ])),
-        #     ('forest', KNeighborsClassifier(metric=fuzzy_score, n_jobs=-1))
-        # ])
+        fuzzy_knn = Pipeline([
+            ('forest', KNeighborsClassifier(metric=fuzzy_score, n_jobs=-1))
+        ])
 
         dtw = Pipeline([
             ('col_transformer', ColumnTransformer([
@@ -96,16 +94,6 @@ def evaluate_ucr(datasets='all'):
             ])),
             ('knn', KNeighborsClassifier(metric=dtw_metric, n_jobs=-1))
         ])
-
-        # fuzzy_dtw = Pipeline([
-        #     ('col_transformer', ColumnTransformer([
-        #         ('fuzzy_coefs', Pipeline([
-        #             ('fuzzy_coefs', FunctionTransformer(lambda x: get_fuzzy(x, h))),
-        #             ('max_scaler', MaxAbsScaler())
-        #         ]), 0)
-        #     ])),
-        #     ('knn', KNeighborsClassifier(metric=dtw_metric, n_jobs=-1))
-        # ])
 
         try:
             start_fuzzy = time.time()
@@ -122,12 +110,6 @@ def evaluate_ucr(datasets='all'):
             end_dtw = time.time()
             print(f'  DTW:   {acc_dtw * 100:.5f}% ({end_dtw - start_dtw:.3f} s)')
 
-            # start_fuzzy_dtw = time.time()
-            # fuzzy_dtw.fit(train_set, train_label)
-            # pred_fuzzy_dtw = fuzzy_dtw.predict(test_set)
-            # acc_fuzzy_dtw = accuracy_score(test_label, pred_fuzzy_dtw)
-            # end_fuzzy_dtw = time.time()
-            # print(f'  Fuzzy DTW:   {acc_fuzzy_dtw * 100:.5f}% ({end_fuzzy_dtw - start_fuzzy_dtw:.3f} s)\n')
 
             results['dataset'].append(s)
             results['train_size'].append(train_set.shape[0])
@@ -149,10 +131,8 @@ def evaluate_ucr(datasets='all'):
 
 if __name__ == '__main__':
     evaluate_ucr(datasets=[
-        'Adiac', 'Beef', 'BeetleFly', 'BirdChicken', 'BME', 'Car', 'CBF', 'Chinatown', 'Coffee', 'Computers', 'Crop',
-        'ECG200', 'ElectricDevices', 'EnthanolLevel', 'FaceFour', 'FiftyWords', 'Fish', 'Fungi', 'GunPoint', 'Ham',
-        'HandOutlines', 'Haptics', 'Heering', 'HouseTwenty', 'InlineSkate', 'ItalyPowerDemand', 'Mallat', 'Meat',
-        'MoteStrain', 'OliveOil',  'Phoneme', 'PLAID', 'Plane', 'PowerCons', 'Rock', 'ScreenType', 'RefrigerationDevices',
-        'ShapesAll', 'Symbols', 'Strawberry', 'StarLightCurves', 'SwedishLeaf', 'SmoothSubspace', 'SmallKitchenAppliances',
-        'Trace', 'TwoPatterns', 'UMD', 'Wafer', 'Wine', 'WordSynonyms', 'Worms', 'Yoga'
+        'PowerCons', 'Coffee', 'BME', 'SmoothSubspace', 'Wafer', 'Plane', 'Strawberry', 'ItalyPowerDemand',
+        'Meat', 'GunPoint', 'CBF', 'UMD', 'BeetleFly', 'Symbols', 'MoteStrain', 'ECG200', 'Trace',
+        'SwedishLeaf', 'FaceFour', 'Yoga', 'Beef', 'Wine', 'Fish', 'Fungi', 'ShapesAll', 'Ham',
+        'FiftyWords', 'ElectricDevices', 'BirdChicken'
     ])

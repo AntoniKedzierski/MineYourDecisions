@@ -1,3 +1,5 @@
+import functools
+
 import pandas as pd
 import numpy as np
 import os
@@ -19,6 +21,7 @@ from sklearn.metrics import silhouette_samples, silhouette_score
 from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier
 from scipy import signal
+from scipy.stats import norm
 import dtaidistance
 
 from core_v2.time_series import TimeSeries
@@ -41,11 +44,22 @@ def get_fuzzy(column, h):
     return np.asarray(coefs)
 
 
+def get_slopes(column, h0, h1):
+    slopes = []
+    for ts in column:
+        slopes.append(zip(ts.fuzzy_coefs(h0), ts.fuzzy_slope_coefs(h1)[:, 1]))
+    print(slopes)
+
+
 def get_values(column):
     values = []
     for ts in column:
         values.append(ts.values)
     return np.asarray(values)
+
+
+def ts_max_scaling(column):
+    return np.asarray([ts.max_scaling() for ts in column])
 
 
 def dtw_metric(x, y):
@@ -156,12 +170,12 @@ def analyze_dataset(dir, path_to_dir='data/UCR/'):
     acc_fuzzy = accuracy_score(test_label, pred_fuzzy)
 
     best_accuracy = max(other_methods_perf['accuracy'])
-
     best_methods = ' '.join(other_methods_perf.loc[other_methods_perf['accuracy'] == best_accuracy, 'method'])
 
-    print(f'\n  Dokładność: ${acc_fuzzy * 100:.2f}\\%$.')
+    print(f'\n  Dokładność lasu losowego: ${acc_fuzzy * 100:.2f}\\%$.')
+    print(f'  Dokładność KNN: ${acc_fuzzy_knn * 100:.2f}\\%$.')
     print(f'  Maks. dokładność osiągnięta przez {best_methods} wynosi ${best_accuracy * 100:.2f}\\%$.')
-    print(f'Mediana dokładności klasyfikatorów: ${other_methods_perf["accuracy"].median() * 100:.2f}\\%$.')
+    print(f'  Mediana dokładności klasyfikatorów: ${other_methods_perf["accuracy"].median() * 100:.2f}\\%$.')
     if best_accuracy <= 0.85:
         print('Mierne wyniki klasyfikacji dla wszystkich metod.')
 
@@ -185,6 +199,8 @@ def analyze_dataset(dir, path_to_dir='data/UCR/'):
     plt.savefig(f'../results/plots/classifiers/{dir}.png', dpi=100)
     plt.show()
 
+    return acc_fuzzy
+
     # Wypisz błędnie zaklasyfikowane obserwacje
     # if acc_fuzzy < 1:
     #     wrong_answers = np.c_[pred_fuzzy, test_label, test_set][pred_fuzzy != test_label]
@@ -199,45 +215,96 @@ def gorecki_piasecki_build():
     gp.iloc[:, 1:] = gp.iloc[:, 1:].apply(lambda x: round((100 - x) / 100, 5), axis=1)
     gp.to_csv('../data/gorecki_piasecki.csv', index=False)
 
+
 def best_accuracies():
     gp = pd.read_csv('../data/gorecki_piasecki.csv').melt(id_vars='dataset', var_name='method', value_name='accuracy').sort_values(by='accuracy', ascending=False).groupby(by='dataset').head(1).sort_values(by='dataset')
     print(gp)
 
+
 def compare_methods():
-    gp = pd.read_csv('../data/gorecki_piasecki.csv')
-    gp = gp.loc[gp['dataset'].isin(cool_sets), :].melt(id_vars='dataset', var_name='method', value_name='accuracy')
-    ftrans = pd.read_csv('../results/eval_3.txt', sep=' ')[['Zbiór', 'f_trans']].rename(columns={'Zbiór': 'dataset', 'f_trans': 'accuracy'})
-    ftrans['method'] = 'f-transform'
-    ftrans['accuracy'] /= 100
-    total = pd.concat([gp, ftrans], axis=0).reset_index(drop=True)
-    sorted_index = list(total.groupby(by='method').median().sort_values(by='accuracy').index)
-    sort_dict = dict(zip(sorted_index, range(len(sorted_index))))
-    total['rank'] = total['method'].map(sort_dict)
-    total = total.sort_values(by='rank')
-    total_pvt = total.pivot(index='method', columns='dataset', values='accuracy')
-    # plt.figure(figsize=(16, 20))
-    # sns.boxplot(y='method', x='accuracy', data=total, orient='h')
-    # plt.title('Porównanie metod klasyfikacji.')
-    # plt.savefig('../results/plots/porownanie.png')
+    metrics = pd.read_csv('../results/metrics.csv')
+    scores = metrics.iloc[:, 1:].melt(var_name='method', value_name='error_rate')
+    scores['error_rate'] = 1 - scores['error_rate']
+    methods = scores.groupby('method').agg(['mean', 'std'])
+    methods.columns = ['_'.join(x) for x in methods.columns.ravel()]
+    kmeans = KMeans(n_clusters=3)
+    methods['class'] = kmeans.fit_predict(methods)
+    methods = methods.reset_index()
+
+    ## Mapa kolorów dla klas
+    cmap = {
+        0: {
+            'fill': '#fe5f55',
+            'edge': '#510600'
+        },
+        1: {
+            'fill': '#bdd5ea',
+            'edge': '#4589C4'
+        },
+        2: {
+            'fill': '#7fb069',
+            'edge': '#3F5E31'
+        }
+    }
+
+    # Rysujemy
+    plt.figure(figsize=(18, 12), dpi=240)
+    for i, method in methods.iterrows():
+        plt.text(
+            x=method['error_rate_mean'],
+            y=method['error_rate_std'],
+            s=method['method'],
+            size=14,
+            ha='center',
+            va='center',
+            bbox={
+                'boxstyle': 'round',
+                'ec': cmap[method['class']]['edge'],
+                'fc': cmap[method['class']]['fill']
+            },
+            alpha=0.8
+        )
+
+    plt.xlim(0, 0.63)
+    plt.ylim(0.10, 0.27)
+    plt.xlabel("Średni błąd")
+    plt.ylabel("Odchylenie standardowe błędu")
+    # plt.savefig('../results/methods_clusters.png', dpi=240)
     # plt.show()
-    kmeans = KMeans(4)
-    pred = kmeans.fit_predict(total_pvt)
-    silhouette_avg = silhouette_score(total_pvt, pred)
-    print(
-        "The average silhouette_score is :",
-        silhouette_avg,
-    )
-    print(pd.DataFrame({'method': list(total_pvt.index), 'class': pred}).sort_values(by='class'))
+
+    f_transform = metrics.loc[:, ['dataset', 'F-transformata']].rename(columns={'F-transformata': 'accuracy'})
+    wilcoxon = {'method': [], 'statistics': []}
+    for method in metrics.columns:
+        if method == 'F-transformata' or method == 'dataset':
+            continue
+        diffs = f_transform['accuracy'] - metrics[method]
+        ranked_diffs = diffs.reset_index().sort_values(by=0).rename(columns={'index': 'set'}).reset_index(drop=True).reset_index().rename(columns={'index': 'rank', 0: 'diff'})
+        R_plus = sum(ranked_diffs.loc[ranked_diffs['diff'] > 0, 'rank']) + 0.5 * sum(ranked_diffs.loc[ranked_diffs['diff'] == 0, 'rank'])
+        R_minus = sum(ranked_diffs.loc[ranked_diffs['diff'] < 0, 'rank']) + 0.5 * sum(ranked_diffs.loc[ranked_diffs['diff'] == 0, 'rank'])
+        wilcoxon['method'].append(method)
+        wilcoxon['statistics'].append(min(R_plus, R_minus))
+
+    N = metrics.shape[0]
+    wilcoxon = pd.DataFrame(wilcoxon)
+    wilcoxon['norm_approx'] = (wilcoxon['statistics'] - 0.25 * N * (N + 1)) / math.sqrt(N * (N + 1) * (2 * N + 1) / 24)
+    wilcoxon['p_value'] = norm.cdf(wilcoxon['norm_approx'])
+    print(wilcoxon.loc[wilcoxon['p_value'] >= 0.005, :].sort_values(by='p_value', ascending=False))
+
+
+def eval_scores():
+    res = {'dataset': [], 'fuzzy': []}
+    for s in cool_sets:
+        res['dataset'].append(s)
+        res['fuzzy'].append(analyze_dataset(s, path_to_dir='../data/UCR/'))
+
+    gp = pd.read_csv('../data/gorecki_piasecki.csv')
+    gp = gp.loc[gp['dataset'].isin(cool_sets), :]
+    res = pd.DataFrame(res).merge(gp, left_on='dataset', right_on='dataset')
+    res.to_csv('../results/metrics.csv', index=False)
 
 
 if __name__ == '__main__':
-    # train_set, train_label, test_set, test_label = unpack('PowerCons', path_to_dir='../data/UCR/')
-    # train_set[2, 0].fuzzy_plot(12, title='F-transformata')
-    # train_set[2, 0].fuzzy_anomalies(12).plot()
-    # analyze_dataset('FiftyWords', path_to_dir='../data/UCR/')
-    compare_methods()
-    # best_accuracies()
-    # W niektórych sytuacjach F-transformata prowadzi do zbyt dużych uogólnień, dlatego należy zwężać okno. (!)
-    # Dla szczegółowych danych, różnią
-    # Mało obserwacji - dużo drzew
-    # Krótkie szeregi - małe okno
+    analyze_dataset('PowerCons', path_to_dir='../data/UCR/')
+
+
+
