@@ -9,7 +9,6 @@ import typing
 import numbers
 import functools
 
-
 from core_v2.fuzzy import triang_fuzzy
 
 
@@ -133,8 +132,18 @@ class TimeSeries:
     # Utils
     # ===================
     def plot(self, features='value', **kwargs):
+        if 'mark_points' in kwargs:
+            mark_points = self.df.iloc[kwargs['mark_points'], :]
+
         if features == 'value':
             sns.lineplot(x=self.time_index_name, y=self.value_names[0], data=self.df)
+            if 'add_fuzzy_approx' in kwargs and 'fuzzy_partition' in kwargs:
+                if kwargs['add_fuzzy_approx']:
+                    _, plot_y = self.fuzzy_plot(kwargs['fuzzy_partition'], get_plot_data=True)
+                    plt.plot(self.df[self.time_index_name], plot_y, linestyle='--', alpha=0.7)
+            if 'mark_points' in kwargs:
+                plt.plot(mark_points[self.time_index_name], mark_points[self.value_names[0]], 'o', color='red')
+
         elif isinstance(features, (pd.Series, np.ndarray, typing.Sequence)) or features == 'all':
             columns = []
             if features == 'all':
@@ -151,13 +160,28 @@ class TimeSeries:
             plt.title(kwargs['title'])
         else:
             plt.title(self.name)
-        plt.show()
+
+        if 'save_path' in kwargs:
+            plt.savefig(kwargs['save_path'])
+            plt.close()
+        else:
+            plt.show()
 
 
     def max_scaling(self, inplace=False):
         new_values = copy.deepcopy(self.df)
         for c in new_values.columns[1:]:
             new_values[c] /= max(np.abs(new_values[c]))
+
+        if not inplace:
+            return TimeSeries(new_values)
+        self.values = new_values
+
+
+    def normalize(self, inplace=False):
+        new_values = copy.deepcopy(self.df)
+        for c in new_values.columns[1:]:
+            new_values[c] = (new_values[c] - np.mean(new_values[c])) / np.std(new_values[c])
 
         if not inplace:
             return TimeSeries(new_values)
@@ -302,6 +326,10 @@ class TimeSeries:
             if plot_x[i] <= partition[1] or plot_x[i] >= partition[-2]:
                 plot_y[i] = None
 
+        if 'get_plot_data' in kwargs:
+            if kwargs['get_plot_data']:
+                return plot_x, plot_y
+
         sns.lineplot(x=self.enumaration, y=self.values, linestyle='--', alpha=0.4)
         sns.lineplot(x=plot_x, y=plot_y)
         if 'title' in kwargs:
@@ -361,7 +389,7 @@ class TimeSeries:
         factor_0 = kappa_0 * sum(np.abs(coefs_x_0 - coefs_y_0)) / (coefs_x_0.shape[0] - 1)
         factor_1 = kappa_1 * (sum(np.abs(coefs_x_1 - coefs_y_1)) / normalization) / (coefs_x_1.shape[0] - 1)
 
-        return max(0, 1 - factor_0 + factor_1)
+        return max(0, 1 - factor_0 - factor_1)
 
 
     # =====================
@@ -394,25 +422,15 @@ class TimeSeries:
         factor_0 = kappa_0 * sum(np.abs(x['deg0'] - y['deg0'])) / (x['deg0'].shape[0] - 1)
         factor_1 = kappa_1 * (sum(np.abs(x['deg1'] - y['deg1'])) / normalization) / (x['deg1'].shape[0] - 1)
 
-        return max(0, 1 - factor_0 + factor_1)
+        return max(0, 1 - factor_0 - factor_1)
 
 
 if __name__ == '__main__':
     all_stocks = []
     for s in os.listdir('../data/djia_composite'):
-        ts = TimeSeries.read_csv(f'../data/djia_composite/{s}', name=s.split('.')[0])
-        all_stocks.append(ts)
-
-    n = len(all_stocks)
-    sim_scores = np.zeros(shape=(n, n))
-    for i in range(n):
-        sim_scores[i, i] = 1
-        for j in range(i + 1, n):
-            score = all_stocks[i].fuzzy_similariry(all_stocks[j], 5, 8, 1, 0.75)
-            sim_scores[i, j] = score
-            sim_scores[j, i] = score
-
-    print(sim_scores)
+        ts = TimeSeries.read_csv(f'../data/djia_composite/{s}', name=s.split('.')[0]).max_scaling()
+        ts.plot(features=['open'])
+        abs(ts.fuzzy_anomalies(7)).plot()
 
 
 
